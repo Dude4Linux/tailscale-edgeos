@@ -92,7 +92,7 @@ if ! echo $pkg_status| grep -qF "install ok installed"; then
 	else
 		echo "Installing Tailscale"
 		apt-get update
-		apt-get install tailscale
+		apt-get -qy install tailscale
 		mkdir -p /config/data/firstboot/install-packages
 		cp /var/cache/apt/archives/tailscale_*.deb /config/data/firstboot/install-packages
 	fi
