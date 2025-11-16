@@ -46,8 +46,7 @@ systemctl daemon-reload
 
 # Ensure there is a post-config script to install Tailscale
 mkdir -p /config/scripts/post-config.d
-if [ ! -x /config/scripts/post-config.d/tailscale.sh ]; then
-	cat > /config/scripts/post-config.d/tailscale.sh <<"EOF"
+cat > /config/scripts/post-config.d/tailscale.sh <<"EOF"
 #!/bin/sh
 
 set -e
@@ -109,5 +108,5 @@ if [ -n "$reload" ]; then
 	systemctl --no-block restart tailscaled
 fi
 EOF
-	chmod 755 /config/scripts/post-config.d/tailscale.sh
-fi
+
+chmod 755 /config/scripts/post-config.d/tailscale.sh
