@@ -91,10 +91,12 @@ if ! echo $pkg_status| grep -qF "install ok installed"; then
 		systemd-run --no-block dpkg --configure -a
 	else
 		echo "Installing Tailscale"
+    # Clear storage space to allow installation on ER-X
+    # remove old tailscale packages if they exist
+    rm /config/data/firstboot/install-packages/tailscale*.deb
 		apt-get update
 		apt-get -qy install tailscale
-		mkdir -p /config/data/firstboot/install-packages
-		cp /var/cache/apt/archives/tailscale_*.deb /config/data/firstboot/install-packages
+    # since storage space on ER-X is limited, we can't keep a second copy
 	fi
 fi
 
