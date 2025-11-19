@@ -5,6 +5,16 @@ set -e
 sed -i 's|^mozilla\/DST_Root_CA_X3\.crt|!mozilla/DST_Root_CA_X3.crt|' /etc/ca-certificates.conf
 update-ca-certificates --fresh
 
+# Install Tailscale Repository
+source /opt/vyatta/etc/functions/script-template
+configure
+set system package repository tailscale url '[signed-by=/usr/share/keyrings/tailscale-stretch-stable.gpg] https://pkgs.tailscale.com/stable/debian'
+set system package repository tailscale distribution stretch
+set system package repository tailscale components main
+commit comment "Add Tailscale repository"
+save; exit
+
+# Create directories for Tailscale
 mkdir -p /config/tailscale/systemd/tailscaled.service.d
 mkdir -p /config/tailscale/state
 
