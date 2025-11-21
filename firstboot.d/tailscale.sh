@@ -1,6 +1,9 @@
 #!/bin/sh
+# Add support for EdgeOS 3.0+ on ER-X routers
 
 set -e
+
+version="3.0";
 
 sed -i 's|^mozilla\/DST_Root_CA_X3\.crt|!mozilla/DST_Root_CA_X3.crt|' /etc/ca-certificates.conf
 update-ca-certificates --fresh
@@ -60,6 +63,8 @@ cat > /config/scripts/post-config.d/tailscale.sh <<"EOF"
 #!/bin/sh
 
 set -e
+
+version="${script-version}";
 
 reload=""
 
