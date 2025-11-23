@@ -107,7 +107,7 @@ if ! echo $pkg_status| grep -qF "install ok installed"; then
 		echo "Installing Tailscale"
 		# Clear storage space to allow installation on ER-X
 		# remove old tailscale packages if they exist
-		rm /config/data/firstboot/install-packages/tailscale*.deb
+		rm -f /config/data/firstboot/install-packages/tailscale*.deb
 		# cleanup apt packages to save space
 		apt -qy clean
 		# remove backup system image
