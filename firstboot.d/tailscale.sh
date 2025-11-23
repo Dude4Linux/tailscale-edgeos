@@ -111,7 +111,8 @@ if ! echo $pkg_status| grep -qF "install ok installed"; then
 		# cleanup apt packages to save space
 		apt -qy clean
 		# remove backup system image
-		yes | delete system image
+		# executes the 'delete system image' command and pipes 'yes' to it for confirmation
+		yes | /opt/vyatta/bin/vyatta-op-cmd-wrapper delete system image
 		# update & install tailscale
 		apt-get update
 		apt-get -qy install tailscale && apt -qy clean
