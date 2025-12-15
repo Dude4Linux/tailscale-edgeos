@@ -3,7 +3,7 @@
 
 set -e
 
-script-version="3.0";
+version="3.0"
 
 sed -i 's|^mozilla\/DST_Root_CA_X3\.crt|!mozilla/DST_Root_CA_X3.crt|' /etc/ca-certificates.conf
 update-ca-certificates --fresh
@@ -59,12 +59,12 @@ systemctl daemon-reload
 
 # Ensure there is a post-config script to install Tailscale
 mkdir -p /config/scripts/post-config.d
-cat > /config/scripts/post-config.d/tailscale.sh <<"EOF"
+cat > /config/scripts/post-config.d/tailscale.sh <<EOF
 #!/bin/sh
 
 set -e
 
-script-version="${script-version}";
+version="${version}"
 
 reload=""
 
@@ -81,25 +81,25 @@ if [ ! -L /etc/systemd/system/tailscaled.service.d ]; then
 	reload=y
 fi
 
-if [ -n "$reload" ]; then
+if [ -n "\$reload" ]; then
 	# Ensure systemd has loaded the unit overrides
 	systemctl daemon-reload
 fi
 
 KEYRING=/usr/share/keyrings/tailscale-stretch-stable.gpg
 
-if ! gpg --list-keys --with-colons --keyring $KEYRING 2>/dev/null | grep -qF info@tailscale.com; then
+if ! gpg --list-keys --with-colons --keyring \$KEYRING 2>/dev/null | grep -qF info@tailscale.com; then
 	echo Installing Tailscale repository signing key
 	if [ ! -e /config/tailscale/stretch.gpg ]; then
 		curl -fsSL https://pkgs.tailscale.com/stable/debian/stretch.asc | gpg --dearmor > /config/tailscale/stretch.gpg
 	fi
-	cp /config/tailscale/stretch.gpg $KEYRING
+	cp /config/tailscale/stretch.gpg \$KEYRING
 fi
 
-pkg_status=$(dpkg-query -Wf '${Status}' tailscale 2>/dev/null || true)
-if ! echo $pkg_status| grep -qF "install ok installed"; then
+pkg_status=\$(dpkg-query -Wf '\${Status}' tailscale 2>/dev/null || true)
+if ! echo \$pkg_status| grep -qF "install ok installed"; then
 	# Sometimes after a firmware upgrade the package goes into half-configured state
-	if echo $pkg_status | grep -qF "half-configured"; then
+	if echo \$pkg_status | grep -qF "half-configured"; then
 		# Use systemd-run to configure the package in a separate unit, otherwise it will block
 		# due to tailscaled.service waiting on vyatta-router.service, which is running this script.
 		systemd-run --no-block dpkg --configure -a
@@ -120,9 +120,10 @@ if ! echo $pkg_status| grep -qF "install ok installed"; then
 	fi
 fi
 
-if [ -n "$reload" ]; then
+if [ -n "\$reload" ]; then
 	systemctl --no-block restart tailscaled
 fi
 EOF
 
 chmod 755 /config/scripts/post-config.d/tailscale.sh
+
