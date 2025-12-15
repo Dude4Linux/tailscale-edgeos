@@ -3,7 +3,7 @@
 
 set -e
 
-version="3.0";
+script-version="3.0";
 
 sed -i 's|^mozilla\/DST_Root_CA_X3\.crt|!mozilla/DST_Root_CA_X3.crt|' /etc/ca-certificates.conf
 update-ca-certificates --fresh
@@ -64,7 +64,7 @@ cat > /config/scripts/post-config.d/tailscale.sh <<"EOF"
 
 set -e
 
-version="${script-version}";
+script-version="${script-version}";
 
 reload=""
 
