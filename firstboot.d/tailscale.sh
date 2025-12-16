@@ -10,14 +10,19 @@ update-ca-certificates --fresh
 
 # Install Tailscale Repository
 source /opt/vyatta/etc/functions/script-template
-configure
-set system package repository tailscale url '[signed-by=/usr/share/keyrings/tailscale-stretch-stable.gpg] https://pkgs.tailscale.com/stable/debian'
-set system package repository tailscale distribution stretch
-set system package repository tailscale components main
-commit comment "Add Tailscale repository"
-save; exit
+# Check if repository is already installed
+installed=$(run show configuration commands | grep -c 'set system package repository tailscale')
 
-# Create directories for Tailscale
+if [ ${installed} -lt "3" ]; then
+	echo "Installing Tailscale Repository..."
+	configure
+	set system package repository tailscale url '[signed-by=/usr/share/keyrings/tailscale-stretch-stable.gpg] https://pkgs.tailscale.com/stable/debian'
+	set system package repository tailscale distribution stretch
+	set system package repository tailscale components main
+	commit comment "Add Tailscale repository"
+	save
+fi
+
 mkdir -p /config/tailscale/systemd/tailscaled.service.d
 mkdir -p /config/tailscale/state
 
