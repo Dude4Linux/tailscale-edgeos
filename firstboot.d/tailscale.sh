@@ -11,7 +11,7 @@ update-ca-certificates --fresh
 # Install Tailscale Repository
 source /opt/vyatta/etc/functions/script-template
 # Check if repository is already installed
-installed=$(run show configuration commands | grep -c 'set system package repository tailscale')
+installed=$(run show configuration commands | grep -c 'set system package repository tailscale' || true)
 
 if [ ${installed} -lt "3" ]; then
 	echo "Installing Tailscale Repository..."
@@ -119,8 +119,10 @@ if ! echo \$pkg_status| grep -qF "install ok installed"; then
 		# executes the 'delete system image' command and pipes 'yes' to it for confirmation
 		yes | /opt/vyatta/bin/vyatta-op-cmd-wrapper delete system image
 		# update & install tailscale
+		# Pin to 1.44.2: Go 1.22+ uses FUTEX_WAKE_PRIVATE (lock_spinbit scheduler)
+		# which the ER-X 3.10 kernel doesn't support, causing SIGSEGV on newer builds.
 		apt-get update
-		apt-get -qy install tailscale && apt -qy clean
+		apt-get -qy install tailscale=1.44.2 && apt -qy clean
 		# since storage space on ER-X is limited, we can't keep a second copy
 	fi
 fi
