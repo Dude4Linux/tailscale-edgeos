@@ -69,6 +69,19 @@ chmod 755 /config/scripts/firstboot.d/tailscale.sh
       save && exit
       ```
 
+4. (Optional) If `service dns forwarding` is configured on the router and you want Tailscale peers (or LAN clients reaching the router over Tailscale) to use it as a resolver
+
+    EdgeOS configures dnsmasq with `--local-service` whenever `listen-on` is set, which silently drops any DNS query whose source address isn't on one of the listed interfaces' directly-connected subnets. Queries arriving via `tailscale0` — including from local clients that route to the router over Tailscale rather than the LAN — will time out without this.
+
+   ```sh
+   configure
+   set service dns forwarding listen-on tailscale0
+   commit comment "dns forwarding answer tailnet clients"
+   save && exit
+   ```
+
+   :warning: Every device in your tailnet — including any `tagged-devices` — can now query this forwarder. Acceptable for most home setups since the forwarder only proxies to public upstreams plus any local `address=` / `server=` overrides, but worth knowing.
+
 ## Firmware Upgrades
 
 After an EdgeOS upgrade, third-party packages are no longer installed, but the
@@ -133,3 +146,13 @@ delete system package repository tailscale
 commit comment "Remove Tailscale repository"
 save && exit
 ```
+
+## Troubleshooting
+
+### DNS queries from Tailscale clients to the router time out
+
+**Symptom:** A Tailscale peer (or a LAN client whose route to the router goes via Tailscale) configured to use the router's `service dns forwarding` as its DNS server sees every query time out. Wired clients on the directly-connected LAN subnet work fine. `dig @<router-ip> example.com` from the affected client hangs until timeout; on the router, `show dns forwarding statistics` shows healthy traffic from other clients.
+
+**Cause:** EdgeOS invokes dnsmasq with `--local-service` whenever `listen-on` is set. That flag tells dnsmasq to silently drop any query whose source address is not on one of the listed interfaces' directly-connected subnets. Packets arriving on `tailscale0` come from `100.64.0.0/10` source addresses that aren't on any switch/eth subnet, so they're dropped before dnsmasq generates a response — no ICMP, no REFUSED, just silence.
+
+**Fix:** Add `tailscale0` to the list of interfaces dnsmasq listens on — see step 4 under [Installing Tailscale](#installing-tailscale).
